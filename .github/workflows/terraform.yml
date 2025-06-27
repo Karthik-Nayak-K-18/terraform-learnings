@@ -1,0 +1,61 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+      - prod
+
+env:
+  TF_BUCKET: devops-terraform-state-karthik
+  TF_REGION: us-east-1
+  TF_DYNAMODB_TABLE: terraform-locks
+
+jobs:
+  terraform:
+    name: Terraform Workflow
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☁️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.TF_REGION }}
+
+      - name: 🧽 Terraform Format Check
+        run: terraform fmt -check
+
+      - name: 🛠 Terraform Init
+        run: |
+          terraform init -backend-config="bucket=${TF_BUCKET}" \
+                         -backend-config="key=envs/${GITHUB_REF_NAME}/terraform.tfstate" \
+                         -backend-config="region=${TF_REGION}" \
+                         -backend-config="dynamodb_table=${TF_DYNAMODB_TABLE}" \
+                         -backend-config="encrypt=true"
+
+      - name: 🔍 Terraform Validate
+        run: terraform validate
+
+      - name: 📐 Terraform Plan
+        run: |
+          terraform workspace select ${GITHUB_REF_NAME} || terraform workspace new ${GITHUB_REF_NAME}
+          terraform plan -input=false
+
+      # Optional: Uncomment to auto-apply on push to prod only
+      # - name: 🚀 Terraform Apply
+      #   if: github.ref == 'refs/heads/prod'
+      #   run: terraform apply -auto-approve -input=false
