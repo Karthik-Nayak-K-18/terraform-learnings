@@ -5,6 +5,11 @@ on:
     branches:
       - dev
       - prod
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '**/backend*.conf'
+      - '.github/workflows/terraform.yml'
 
 env:
   TF_BUCKET: devops-terraform-state-karthik
@@ -60,9 +65,4 @@ jobs:
         if: github.ref == 'refs/heads/prod'
         run: terraform apply -auto-approve -input=false
 
-      # - name: Terraform Destroy (Manual or Temporary Use)
-      #   if: github.ref == 'refs/heads/prod'
-      #   run: |
-      #     terraform workspace select prod || terraform workspace new prod
-      #     terraform destroy -auto-approve -input=false
 
