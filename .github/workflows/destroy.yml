@@ -1,0 +1,50 @@
+name: Manual Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: 'Terraform workspace to destroy (e.g., prod or prod)'
+        required: true
+        default: prod
+
+env:
+  TF_BUCKET: prodops-terraform-state-karthik
+  TF_REGION: us-east-1
+  TF_DYNAMODB_TABLE: terraform-locks
+
+jobs:
+  destroy:
+    name: Terraform Destroy Job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☁️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.TF_REGION }}
+
+      - name: 🛠 Terraform Init with Remote Backend
+        run: |
+          terraform init -backend-config="bucket=${TF_BUCKET}" \
+                         -backend-config="key=envs/${{ github.event.inputs.workspace }}/terraform.tfstate" \
+                         -backend-config="region=${TF_REGION}" \
+                         -backend-config="dynamodb_table=${TF_DYNAMODB_TABLE}" \
+                         -backend-config="encrypt=true"
+
+      - name: 🚧 Select Workspace
+        run: |
+          terraform workspace select ${{ github.event.inputs.workspace }} || terraform workspace new ${{ github.event.inputs.workspace }}
+
+      - name: 💣 Terraform Destroy
+        run: terraform destroy -auto-approve -input=false
