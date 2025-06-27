@@ -1,11 +1,11 @@
 output "vpc_id" {
-	description = "vpc id to be displayed"
-	value = module.vpc.vpc_id
+  description = "vpc id to be displayed"
+  value       = module.vpc.vpc_id
 }
 
 output "public_subnet_id" {
-	description = "subnet id to be displayed"
-	value = module.vpc.public_subnet_id
+  description = "subnet id to be displayed"
+  value       = module.vpc.public_subnet_id
 }
 
 output "public_ip" {

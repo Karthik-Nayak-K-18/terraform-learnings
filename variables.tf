@@ -23,22 +23,22 @@ variable "name_prefix" {
 }
 
 variable "region" {
-	description = "Specify the region of the ec2 instance"
-	type = string
+  description = "Specify the region of the ec2 instance"
+  type        = string
 }
 
 variable "instance_type" {
-	description = "instance type of ec2"
-	type = string
-	default = "t2.micro"
+  description = "instance type of ec2"
+  type        = string
+  default     = "t2.micro"
 }
 
 variable "instance_name" {
-	description = "Name tag of the ec2 instance"
-	type = string
+  description = "Name tag of the ec2 instance"
+  type        = string
 }
 
 variable "key_name" {
-	description = "key pair name for ec2 ssh"
-	type = string
+  description = "key pair name for ec2 ssh"
+  type        = string
 }
