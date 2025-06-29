@@ -60,14 +60,14 @@ jobs:
           terraform workspace select ${GITHUB_REF_NAME} || terraform workspace new ${GITHUB_REF_NAME}
           terraform plan -input=false
 
-      # Optional: Uncomment to auto-apply on push to prod only
-      #- name: Terraform Apply
-      # if: github.ref == 'refs/heads/prod'
-      # run: terraform apply -auto-approve -input=false
-
-      - name: 💣 Terraform Destroy (Manual or Temporary Use)
+       #Optional: Uncomment to auto-apply on push to prod only
+      - name: Terraform Apply
         if: github.ref == 'refs/heads/prod'
-        run: |
-         terraform workspace select prod || terraform workspace new prod
-         terraform destroy -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false
+
+      #- name: 💣 Terraform Destroy (Manual or Temporary Use)
+      #  if: github.ref == 'refs/heads/prod'
+       # run: |
+       #  terraform workspace select prod || terraform workspace new prod
+         #terraform destroy -auto-approve -input=false
 
